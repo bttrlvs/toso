@@ -1,1 +1,34 @@
-From roots to small goods
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOSO 土小 — 뿌리에서 출발한 작은 물건들</title>
+<meta name="description" content="한국 전통 유물에서 영감을 받아 오늘의 작은 물건을 만듭니다. TOSO 土小의 발굴터에서 새로운 제품을 발견하세요.">
+<meta name="theme-color" content="#302319"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="header"><a class="brand" href="#" aria-label="TOSO 홈"><img class="brand-logo" src="assets/toso-logo.svg" alt="TOSO" width="710" height="190"><span class="brand-hanja">土小</span></a><nav aria-label="주 메뉴"><a href="#story">OUR ROOTS</a><button data-open="collection">COLLECTION</button><button data-open="shop">SHOP <span class="shop-status">준비 중</span></button></nav></header>
+<main>
+<section class="excavation" aria-labelledby="hero-title">
+<div class="intro"><p class="eyebrow">FROM ROOTS TO SMALL GOODS</p><h1 id="hero-title">뿌리에서 출발한<br>작은 물건들.</h1><p class="invitation">흙 속에 숨은 작은 빛을 발견해 보세요.</p></div>
+<div class="dig-wrap"><div class="dig" role="group" aria-label="세 명의 고고학자가 유물을 발굴하는 탑뷰 장면. 빛나는 제품을 눌러 자세히 볼 수 있습니다.">
+<img class="dig-image" src="assets/excavation-wide.svg" alt="흙으로 된 발굴터에서 세 사람이 붓질하며 유물을 발견하는 정확한 탑뷰 장면" fetchpriority="high" width="1536" height="1024">
+<button class="find buddha" data-product="buddha" aria-label="붓다메이커 발견하기"><span class="spark" aria-hidden="true">✧</span><span class="find-label">붓다메이커</span></button>
+<button class="find lion" data-product="lion" aria-label="청자모양 사자연적 화병 발견하기"><span class="spark" aria-hidden="true">✧</span><span class="find-label">사자연적 화병</span></button>
+<button class="find cap" data-product="cap" aria-label="인두형 토제품 치약캡 발견하기"><span class="spark" aria-hidden="true">✧</span><span class="find-label">인두형 치약캡</span></button>
+<button class="find umbrella" data-product="umbrella" aria-label="갓우산 발견하기"><span class="spark" aria-hidden="true">✧</span><span class="find-label">갓우산</span></button>
+</div></div>
+<div class="dig-footer"><span>오래된 뿌리, 새로운 쓰임.</span><button data-open="collection">모든 물건 살펴보기</button><a href="#story">아래로 내려보기</a></div>
+</section>
+<section id="story" class="story"><div class="story-mark" aria-hidden="true">土<small>흙 토</small>小<small>작을 소</small></div><div class="story-copy"><p class="eyebrow">OUR ROOTS</p><h2>오래된 것에서,<br>오늘 곁에 둘 물건으로.</h2><p>흙은 뿌리가 자라는 곳이자, 오랜 시간을 품은 유산이 머무는 곳입니다. 토소는 한국 전통 유물에서 영감을 얻어 일상 속 작은 물건을 만듭니다.</p><p>유물의 형태를 다시 바라보고, 오늘의 쓰임을 더합니다.<br>우리의 뿌리가 당신의 일상에 닿을 수 있도록.</p><span class="signature">TOSO 土小</span></div></section>
+<section class="collection" id="collection"><div class="section-heading"><div><p class="eyebrow">SMALL GOODS, DEEP ROOTS</p><h2>새롭게 발견한 물건들</h2></div><p>유산에서 일상으로 이어지는 토소의 물건.</p></div><div class="product-grid">
+<button class="product-card photo-card" data-product="buddha"><div class="product-visual"><img src="assets/buddha-maker.svg" alt="눈으로 불두 형상을 만드는 붓다메이커 제품 사진" loading="lazy"></div><div class="card-meta"><h3>붓다메이커</h3><span>출시 예정</span></div><p>눈 위에 피어나는, 고요한 미소.</p></button>
+<button class="product-card" data-product="lion"><div class="product-visual soil-detail lion-detail"><span>유물에서 발견한<br>새로운 쓰임</span></div><div class="card-meta"><h3>청자모양 사자연적 화병</h3><span>제품 소개</span></div><p>전통의 형상에 새로운 일상을 담다.</p></button>
+<button class="product-card" data-product="umbrella"><div class="product-visual soil-detail umbrella-detail"><span>일상에 펼치는<br>우리의 전통</span></div><div class="card-meta"><h3>갓우산</h3><span>출시 예정</span></div><p>갓에서 영감을 얻은 새로운 우산.</p></button>
+<button class="product-card compact" data-product="cap"><div><p class="eyebrow">COMING SOON</p><h3>인두형 토제품 치약캡</h3><p>작은 유물의 표정이 일상 속으로.</p></div><span aria-hidden="true">✧</span></button>
+</div></section>
+</main>
+<footer><a class="brand" href="#"><img class="brand-logo" src="assets/toso-logo.svg" alt="TOSO" width="710" height="190"><span class="brand-hanja">土小</span></a><p>뿌리에서 출발한 작은 물건들<br><span>From roots to small goods</span></p><small>© <span id="year"></span> TOSO</small></footer>
+<dialog id="product-dialog" aria-labelledby="dialog-title"><button class="close" aria-label="제품 소개 닫기">×</button><div id="dialog-media"></div><div class="dialog-content"><p class="eyebrow" id="dialog-kicker"></p><h2 id="dialog-title"></h2><p id="dialog-description"></p><p class="dialog-note" id="dialog-note"></p><a id="purchase-link" class="primary" hidden>쇼핑몰에서 보기</a><button class="primary" id="pending-button">확인</button></div></dialog>
+<script src="app.js"></script>
+</body></html>
