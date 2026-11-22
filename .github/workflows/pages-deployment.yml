@@ -1,0 +1,37 @@
+name: Deploy TOSO to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - style.css
+      - app.js
+      - assets/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toso-pages-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Prepare static site
+        run: |
+          mkdir -p dist
+          cp index.html style.css app.js dist/
+          cp -R assets dist/
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=toso-kr --branch=main
