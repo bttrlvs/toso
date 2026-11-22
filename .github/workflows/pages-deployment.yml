@@ -8,6 +8,7 @@ on:
       - style.css
       - app.js
       - assets/**
+      - .github/workflows/pages-deployment.yml
   workflow_dispatch:
 
 permissions:
