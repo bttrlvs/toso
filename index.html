@@ -25,7 +25,7 @@
     button, a { -webkit-tap-highlight-color: transparent; }
     button { font: inherit; cursor: pointer; }
     button:focus-visible, a:focus-visible { outline: 3px solid #e72a39; outline-offset: 4px; }
-    header { position: absolute; z-index: 2; inset: 0 0 auto; display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 12px clamp(20px, 5vw, 72px); background: transparent; color: #fff; transition: background-color 240ms, color 240ms; }
+    header { position: absolute; z-index: 2; inset: 0 0 auto; display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: calc(20px + env(safe-area-inset-top, 0px)) clamp(20px, 5vw, 72px) 12px; background: transparent; color: #fff; transition: background-color 240ms, color 240ms; }
     header[data-menu-open] { background: #fff; color: #211713; }
     body:has(header[data-menu-open]) { overflow: hidden; }
     header > a { display: block; align-self: flex-start; }
@@ -40,7 +40,7 @@
     }
     #menu-button > span { text-box: trim-start cap alphabetic; }
     .menu-panel {
-      position: absolute; top: 100%; inset-inline: 0; height: calc(100dvh - 72px);
+      position: absolute; top: 100%; inset-inline: 0; height: calc(100vh - 78px); height: calc(100dvh - 78px - env(safe-area-inset-top, 0px));
       overflow: hidden; pointer-events: none; color: #211713;
       visibility: hidden; transition: visibility 0s linear 320ms;
     }
@@ -68,10 +68,24 @@
       header, .menu-panel, .menu-panel > ul { transition: none; }
     }
     .excavation-page { position: relative; isolation: isolate; background: radial-gradient(ellipse at 46% 43%, #79543a, #352219 86%); }
-    .dig { --ground-extension: calc(clamp(164px, 48vw, 290px) + 48px); position: relative; isolation: isolate; padding-bottom: var(--ground-extension); min-height: calc(max(620px, 100svh) + var(--ground-extension)); height: calc(min(190vw, 900px) + var(--ground-extension)); overflow: hidden; }
-    .excavation-page canvas { position: absolute; inset: 0; z-index: -1; display: block; width: 100%; height: 100%; pointer-events: none; }
+    .dig { --ground-extension: calc(clamp(164px, 48vw, 290px) + 48px); position: relative; isolation: isolate; padding-bottom: var(--ground-extension); min-height: calc(max(620px, 100vh) + var(--ground-extension)); min-height: calc(max(620px, 100svh) + var(--ground-extension)); height: calc(min(190vw, 900px) + var(--ground-extension)); overflow: hidden; }
+    .excavation-page canvas { position: absolute; inset: 0; z-index: -1; display: block; width: 100%; height: 100%; pointer-events: none; visibility: hidden; }
+    .excavation-page[data-scene-ready] canvas { visibility: visible; }
+    .excavation-page[data-scene-ready] .scene-fallback { display: none; }
+    .scene-fallback { position: absolute; inset: 0; pointer-events: none; }
+    .scene-fallback img { position: absolute; display: block; width: 100%; height: auto; }
+    .fallback-relic { position: absolute; left: var(--x); top: var(--y); width: clamp(38px, 10vw, 82px); transform: translate(-75%, -55%); }
+    .fallback-relic img { position: relative; filter: drop-shadow(0 0 8px #e6a353); }
+    .fallback-person { position: absolute; left: var(--x); top: var(--y); width: clamp(100px, 24vw, 230px); transform: translate(-50%, -50%) rotate(var(--angle)); }
+    .fallback-person img:first-child, .fallback-dog img:first-child { position: relative; }
+    .fallback-person img + img { inset: 0; transform-origin: var(--wrist); animation: fallback-brush 1.46s ease-in-out infinite alternate; animation-delay: var(--delay); }
+    .fallback-dog { position: absolute; width: clamp(150px, 43vw, 330px); right: 5%; bottom: 5%; transform: scaleX(-1); }
+    .fallback-dog img + img { inset: 0; clip-path: polygon(72% 56%, 78% 51%, 91% 54%, 91% 69%, 78% 71%, 68% 64%); transform-origin: 75% 60%; animation: fallback-paw .7s ease-in-out infinite alternate; }
+    @keyframes fallback-brush { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+    @keyframes fallback-paw { from { transform: rotate(-6deg); } to { transform: rotate(7deg) translateX(3%); } }
+    @media (prefers-reduced-motion: reduce) { .scene-fallback img { animation: none !important; } }
     .find {
-      position: absolute; transform: translate(-50%, -50%); display: grid; place-items: center;
+      position: absolute; left: var(--render-x, var(--marker-x)); top: var(--render-y, var(--marker-y)); transform: translate(-50%, -50%); display: grid; place-items: center;
       width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%;
       background: transparent; color: #000;
     }
@@ -83,8 +97,6 @@
     .find::before, .find::after { content: ""; z-index: 1; width: 13px; height: 2px; background: currentColor; }
     .find::after { transform: rotate(90deg); }
     .find:hover span, .find:focus-visible span { background: rgb(255 255 255 / 0.92); }
-    .notice { position: absolute; bottom: max(16px, env(safe-area-inset-bottom)); margin: 0; color: #fff5e8; }
-    .notice { left: 16px; right: 16px; font-size: .875rem; }
     .artifact-card {
       position: fixed; width: min(76vw, 390px); max-height: calc(100dvh - 24px);
       padding: 0; border: 1px solid #111; background: #fff; color: #111;
@@ -105,7 +117,7 @@
         #fff;
     }
     .artifact-card .close-artifact:focus-visible { outline: none; }
-    .artifact-card .close-artifact:focus-visible span { box-shadow: inset 0 0 0 2px currentColor; }
+    .artifact-card .close-artifact:focus-visible span { background-color: #eee; }
     .artifact-image { margin: 0; min-height: 0; text-align: center; }
     .artifact-image img { display: block; width: 100%; height: clamp(130px, 33dvh, 270px); padding: 21px 30px; object-fit: contain; }
     .artifact-gallery[hidden], .artifact-funding[hidden], #find-image[hidden] { display: none; }
@@ -191,11 +203,20 @@
   <div class="excavation-page">
     <canvas id="background" aria-hidden="true"></canvas>
     <main class="dig" id="excavation" aria-label="유물 발굴 현장">
-      <button class="find" style="left:57%;top:18%" type="button" data-find="0" aria-label="붓다메이커 살펴보기"><span aria-hidden="true"></span></button>
-      <button class="find" style="left:32%;top:39%" type="button" data-find="1" aria-label="인두형 토제품 치약캡 살펴보기"><span aria-hidden="true"></span></button>
-      <button class="find" style="left:75%;top:45%" type="button" data-find="2" aria-label="갓클립 살펴보기"><span aria-hidden="true"></span></button>
-      <button class="find" style="left:34%;top:66%" type="button" data-find="3" aria-label="사자 모양 물뿌리개 살펴보기"><span aria-hidden="true"></span></button>
-      <p class="notice" id="scene-notice" hidden>이 브라우저에서 3D 발굴 장면을 표시할 수 없습니다. 유물 설명은 열어볼 수 있습니다.</p>
+      <div class="scene-fallback" aria-hidden="true">
+        <div class="fallback-person" style="--x:27%;--y:20%;--angle:49deg;--wrist:29% 76%;--delay:-.2s"><img src="./assets/archaeologist-bun.webp" alt=""><img src="./assets/archaeologist-bun-hand.webp" alt=""></div>
+        <div class="fallback-person" style="--x:70%;--y:35%;--angle:-25deg;--wrist:68% 71%;--delay:-.6s"><img src="./assets/archaeologist-bob.webp" alt=""><img src="./assets/archaeologist-bob-hand.webp" alt=""></div>
+        <div class="fallback-person" style="--x:28%;--y:56%;--angle:161deg;--wrist:65% 76%;--delay:-1s"><img src="./assets/archaeologist-khaki.webp" alt=""><img src="./assets/archaeologist-khaki-hand.webp" alt=""></div>
+        <div class="fallback-relic" style="--x:57%;--y:18%"><img src="./assets/original-relic-01.webp" alt=""></div>
+        <div class="fallback-relic" style="--x:32%;--y:39%"><img src="./assets/original-relic-02.webp" alt=""></div>
+        <div class="fallback-relic" style="--x:75%;--y:45%"><img src="./assets/original-relic-03.webp" alt=""></div>
+        <div class="fallback-relic" style="--x:34%;--y:66%"><img src="./assets/original-relic-04.webp" alt=""></div>
+        <div class="fallback-dog"><img src="./assets/jindo-excavation-cutout.webp" alt=""><img src="./assets/jindo-excavation-cutout.webp" alt=""></div>
+      </div>
+      <button class="find" style="--marker-x:57%;--marker-y:18%" type="button" data-find="0" aria-label="붓다메이커 살펴보기"><span aria-hidden="true"></span></button>
+      <button class="find" style="--marker-x:32%;--marker-y:39%" type="button" data-find="1" aria-label="인두형 토제품 치약캡 살펴보기"><span aria-hidden="true"></span></button>
+      <button class="find" style="--marker-x:75%;--marker-y:45%" type="button" data-find="2" aria-label="갓클립 살펴보기"><span aria-hidden="true"></span></button>
+      <button class="find" style="--marker-x:34%;--marker-y:66%" type="button" data-find="3" aria-label="사자 모양 물뿌리개 살펴보기"><span aria-hidden="true"></span></button>
     </main>
     <footer class="site-footer">
       <address>5F, 19, Shinconro2gil, Mapo-gu, Seoul,<br>

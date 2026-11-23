@@ -1,5 +1,3 @@
-import * as THREE from './assets/vendor/three.module.min.js';
-
 const stage = document.querySelector('.dig');
 const footer = document.querySelector('.site-footer');
 const canvas = document.querySelector('#background');
@@ -219,22 +217,21 @@ soundToggle.addEventListener('click', async () => {
   }
 });
 
-try {
-  startExcavation();
-} catch (error) {
-  console.error(error);
-  document.querySelector('#scene-notice').hidden = false;
-}
+void import('./assets/vendor/three.module.min.js').then(startExcavation).catch(error => {
+  console.warn('Using the animated 2D excavation scene', error);
+});
 
-function startExcavation() {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+async function startExcavation(THREE) {
+  const page = canvas.parentElement;
+  const compactDevice = matchMedia('(pointer: coarse)').matches;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !compactDevice });
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera();
   camera.up.set(0, 0, -1);
   camera.position.set(0, 16, 0);
   camera.lookAt(0, 0, 0);
   camera.far = 40;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.65));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, compactDevice ? 1 : 1.65));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -245,7 +242,7 @@ function startExcavation() {
   sun.position.set(-4, 7, -5);
   sun.castShadow = true;
   Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, far: 24 });
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.setScalar(compactDevice ? 512 : 1024);
   sun.shadow.normalBias = 0.028;
   sun.shadow.bias = -0.0002;
   scene.add(sun);
@@ -405,7 +402,7 @@ function startExcavation() {
     }
   `;
   function loadBuriedRelic(find, file, width, rotation) {
-    productTextures.load(file, texture => {
+    return productTextures.loadAsync(file).then(texture => {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
       const height = width * texture.image.height / texture.image.width;
@@ -437,15 +434,15 @@ function startExcavation() {
       glow.rotation.y = rotation;
       find.add(glow);
       productGlows.push({ intensity: glowMaterial.uniforms.intensity, phase: finds.indexOf(find) * 0.64 });
-      draw(elapsed);
     });
   }
 
-  loadBuriedRelic(finds[0], './assets/original-relic-01.webp', 0.43, -0.16);
-  loadBuriedRelic(finds[1], './assets/original-relic-02.webp', 0.43, 0.18);
-  loadBuriedRelic(finds[2], './assets/original-relic-03.webp', 0.871, -0.30);
-
-  loadBuriedRelic(finds[3], './assets/original-relic-04.webp', 0.465, -0.21);
+  const relicsReady = [
+    loadBuriedRelic(finds[0], './assets/original-relic-01.webp', 0.43, -0.16),
+    loadBuriedRelic(finds[1], './assets/original-relic-02.webp', 0.43, 0.18),
+    loadBuriedRelic(finds[2], './assets/original-relic-03.webp', 0.871, -0.30),
+    loadBuriedRelic(finds[3], './assets/original-relic-04.webp', 0.465, -0.21),
+  ];
 
   for (const find of finds) {
     for (let i = 0; i < 15; i++) {
@@ -456,65 +453,7 @@ function startExcavation() {
     }
   }
 
-  const fabricTile = document.createElement('canvas');
-  fabricTile.width = fabricTile.height = 128;
-  const weave = fabricTile.getContext('2d');
-  const fabricPixels = weave.createImageData(128, 128);
-  for (let y = 0; y < 128; y++) {
-    for (let x = 0; x < 128; x++) {
-      const grain = 92 + 47 * Math.abs(Math.sin(x * Math.PI / 4) * Math.cos(y * Math.PI / 4)) + random() * 35;
-      fabricPixels.data.set([grain, grain, grain, 255], (y * 128 + x) * 4);
-    }
-  }
-  weave.putImageData(fabricPixels, 0, 0);
-  const fabric = new THREE.CanvasTexture(fabricTile);
-  fabric.wrapS = fabric.wrapT = THREE.RepeatWrapping;
-  fabric.repeat.set(3, 3);
-  const glove = new THREE.MeshStandardMaterial({ color: 0x776e60, roughness: 0.96, bumpMap: fabric, bumpScale: 0.018 });
-  const seam = material(0x514b43);
-  const skin = material(0x9d674a);
-  const wood = material(0x9a6239);
-  const ferrule = material(0x514437, 0.45);
-  const bristle = [material(0xc0a077), material(0x95734c), material(0xd1ae7f)];
-
-  function archaeologist(x, z, angle, sleeveColor, phase) {
-    const root = new THREE.Group();
-    root.position.set(x, 0, z);
-    root.rotation.y = angle;
-    scene.add(root);
-    const sleeve = new THREE.MeshStandardMaterial({ color: sleeveColor, roughness: 0.98, bumpMap: fabric, bumpScale: 0.022 });
-    oval(root, sleeve, 0, 0.67, -2.02, 0.53, 0.44, 0.96);
-    for (let i = 0; i < 4; i++) {
-      const fold = oval(root, sleeve, 0, 0.85 - i * 0.036, -1.73 + i * 0.12, 0.49 - i * 0.045, 0.18, 0.09);
-      fold.rotation.y = -0.15 + i * 0.14;
-    }
-    const pivot = new THREE.Group();
-    pivot.position.set(0, 0, -1.25);
-    root.add(pivot);
-    rod(pivot, skin, [0, 0.58, -0.23], [0.12, 0.35, 0.91], 0.24, 0.14);
-    rod(pivot, seam, [0.12, 0.35, 0.78], [0.125, 0.35, 1.02], 0.16, 0.155);
-    oval(pivot, glove, 0.14, 0.36, 1.13, 0.23, 0.13, 0.28);
-    for (let i = 0; i < 4; i++) {
-      const finger = oval(pivot, glove, -0.013 + i * 0.089, 0.33 - i * 0.009, 1.31 - Math.abs(i - 1) * 0.025, 0.058, 0.083, 0.17);
-      finger.rotation.x = -0.32;
-      finger.rotation.y = 0.13;
-    }
-    oval(pivot, glove, 0.326, 0.33, 1.17, 0.083, 0.078, 0.17).rotation.y = -0.43;
-    rod(pivot, wood, [-0.12, 0.51, 0.96], [0.35, 0.17, 1.61], 0.048, 0.058);
-    rod(pivot, ferrule, [0.34, 0.18, 1.59], [0.42, 0.12, 1.70], 0.061, 0.075);
-    for (let i = 0; i < 25; i++) {
-      const spread = (i / 24 - 0.5) * 0.30;
-      rod(pivot, bristle[i % 3], [0.42 + spread * 0.28, 0.12, 1.70],
-        [0.58 + spread, 0.045 + random() * 0.03, 1.87 - spread * 0.52 + random() * 0.08], 0.012, 0.008, 5);
-    }
-    return { root, pivot, phase };
-  }
-
-  const hands = [
-    archaeologist(-1.78, -2.04, 1.05, 0x939084, 0.2),
-    archaeologist(1.98, -1.09, -1.15, 0xb0a08b, 2.0),
-    archaeologist(-1.35, 1.24, 1.20, 0x8b8978, 3.8),
-  ];
+  const hands = [0.2, 2.0, 3.8].map(phase => ({ phase }));
 
   const portraits = [
     { file: 'bun', x: -0.63, z: -2.16, direction: 0.86, height: 2.8, tip: [0.46, 0.986], wrist: [0.291, 0.762], cropWidth: 327, hide: [
@@ -551,7 +490,7 @@ function startExcavation() {
   }
 
   function setPortrait(hand, { file, x, z, direction, height, tip, wrist, hide, cropWidth }) {
-    Promise.all([
+    return Promise.all([
       portraitLoader.loadAsync(`./assets/archaeologist-${file}.webp`),
       portraitLoader.loadAsync(`./assets/archaeologist-${file}-hand.webp`),
     ]).then(([bodyTexture, handTexture]) => {
@@ -586,9 +525,7 @@ function startExcavation() {
       hand.portrait = {
         wristPivot, brushX: (tip[0] - wrist[0]) * width, brushZ: (tip[1] - wrist[1]) * height,
       };
-      hand.root.visible = false;
-      draw(elapsed);
-    }).catch(error => console.warn('Archaeologist texture unavailable', error));
+    });
   }
 
   const dogRig = new THREE.Group();
@@ -616,7 +553,7 @@ function startExcavation() {
   let dogTail;
 
   function loadDogPortrait() {
-    portraitLoader.load('./assets/jindo-excavation-cutout.webp', texture => {
+    return portraitLoader.loadAsync('./assets/jindo-excavation-cutout.webp').then(texture => {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
       const width = 2.37;
@@ -668,8 +605,7 @@ function startExcavation() {
       pivot.add(new THREE.Mesh(pawGeometry, pawMaterial));
       dogPaw = { pivot, tipX: toX(378) - pivot.position.x, tipZ: toZ(151) - pivot.position.z };
       dogRig.visible = true;
-      draw(elapsed);
-    }, undefined, error => console.warn('Jindo portrait unavailable', error));
+    });
   }
 
   const brushDustCount = 48;
@@ -695,16 +631,25 @@ function startExcavation() {
   let elapsed = 0;
   let previous = 0;
   let frame = 0;
+  let contextLost = false;
+  let shaderFailed = false;
+  renderer.debug.onShaderError = () => { shaderFailed = true; };
+
+  function useFallback() {
+    cancelAnimationFrame(frame);
+    page.removeAttribute('data-scene-ready');
+    markers.forEach(marker => {
+      marker.style.removeProperty('--render-x');
+      marker.style.removeProperty('--render-y');
+    });
+  }
 
   function draw(time) {
     for (const { intensity, phase } of productGlows) {
       intensity.value = motion.matches ? 0.7 : 0.68 + Math.sin(time * 2.3 + phase) * 0.29;
     }
-    for (const { pivot, phase, portrait } of hands) {
+    for (const { phase, portrait } of hands) {
       const sweep = time * 4.3 + phase;
-      pivot.rotation.y = Math.sin(sweep) * 0.23;
-      pivot.rotation.x = 0.03 + Math.cos(sweep) * 0.035;
-      pivot.position.y = (1 + Math.cos(sweep)) * 0.04;
       if (portrait) {
         portrait.wristPivot.rotation.y = Math.sin(sweep) * 0.15;
       }
@@ -729,12 +674,8 @@ function startExcavation() {
     scene.updateMatrixWorld(true);
     grains.forEach(({ source, offset, sway, speed }, i) => {
       const age = (time * speed + offset) % 1;
-      const { portrait, pivot } = hands[source];
-      if (portrait) {
-        portrait.wristPivot.localToWorld(origin.set(portrait.brushX, -0.17, portrait.brushZ));
-      } else {
-        pivot.localToWorld(origin.set(0.55, 0.04, 1.81));
-      }
+      const { portrait } = hands[source];
+      portrait.wristPivot.localToWorld(origin.set(portrait.brushX, -0.17, portrait.brushZ));
       matrix.position.copy(origin);
       matrix.position.x += sway * age;
       matrix.position.z += (sway + 0.36) * age;
@@ -762,7 +703,14 @@ function startExcavation() {
       dust.setMatrixAt(brushDustCount + i, matrix.matrix);
     });
     dust.instanceMatrix.needsUpdate = true;
-    renderer.render(scene, camera);
+    if (contextLost || shaderFailed) return;
+    try {
+      renderer.render(scene, camera);
+    } catch (error) {
+      shaderFailed = true;
+      console.warn('Using the animated 2D excavation scene', error);
+    }
+    if (shaderFailed) useFallback();
   }
 
   function resize() {
@@ -770,6 +718,7 @@ function startExcavation() {
     const extension = parseFloat(getComputedStyle(stage).paddingBottom);
     const baseHeight = height - extension;
     const renderHeight = height + footer.getBoundingClientRect().height;
+    if (width <= 0 || baseHeight <= 0 || contextLost || shaderFailed) return;
     const aspect = width / baseHeight;
     const visibleHeight = Math.max(10.65, 5.85 / aspect);
     const compact = width < 720;
@@ -784,33 +733,56 @@ function startExcavation() {
     artifacts.forEach(({ x, z, markerX, markerZ }, i) => {
       vector.set(x + markerX, 0, z + markerZ).project(camera);
       const marker = markers[i];
-      marker.style.left = `${(vector.x + 1) * 50}%`;
-      marker.style.top = `${(1 - vector.y) * renderHeight / 2}px`;
+      marker.style.setProperty('--render-x', `${(vector.x + 1) * 50}%`);
+      marker.style.setProperty('--render-y', `${(1 - vector.y) * renderHeight / 2}px`);
     });
     draw(elapsed);
+    if (!shaderFailed) page.setAttribute('data-scene-ready', '');
   }
 
   function tick(now) {
     if (previous) elapsed += Math.min((now - previous) / 1000, 0.05);
     previous = now;
     draw(elapsed);
-    frame = requestAnimationFrame(tick);
+    if (!shaderFailed && !contextLost) frame = requestAnimationFrame(tick);
   }
   function updatePlayback() {
     cancelAnimationFrame(frame);
     previous = 0;
-    if (!motion.matches && !document.hidden) frame = requestAnimationFrame(tick);
+    if (!motion.matches && !document.hidden && !shaderFailed && !contextLost) frame = requestAnimationFrame(tick);
   }
-  motion.addEventListener('change', () => {
-    draw(elapsed);
+  await Promise.all([...relicsReady, ...hands.map((hand, i) => setPortrait(hand, portraits[i])), loadDogPortrait()]);
+  contextLost = renderer.getContext().isContextLost();
+
+  function changeMotion() {
+    if (!contextLost && !shaderFailed) draw(elapsed);
+    updatePlayback();
+  }
+  if (motion.addEventListener) motion.addEventListener('change', changeMotion);
+  else motion.addListener(changeMotion);
+  document.addEventListener('visibilitychange', updatePlayback);
+  window.addEventListener('pageshow', () => {
+    resize();
     updatePlayback();
   });
-  document.addEventListener('visibilitychange', updatePlayback);
-  const layoutObserver = new ResizeObserver(resize);
-  layoutObserver.observe(stage);
-  layoutObserver.observe(footer);
+  canvas.addEventListener('webglcontextlost', event => {
+    event.preventDefault();
+    contextLost = true;
+    useFallback();
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    contextLost = false;
+    shaderFailed = false;
+    resize();
+    updatePlayback();
+  });
+  if (typeof ResizeObserver === 'function') {
+    const layoutObserver = new ResizeObserver(resize);
+    layoutObserver.observe(stage);
+    layoutObserver.observe(footer);
+  } else {
+    window.addEventListener('resize', resize);
+  }
   resize();
   updatePlayback();
-  hands.forEach((hand, i) => setPortrait(hand, portraits[i]));
-  loadDogPortrait();
 }
