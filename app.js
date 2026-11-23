@@ -343,6 +343,20 @@ async function startExcavation(THREE) {
   stone.receiveShadow = true;
   scene.add(stone);
 
+  const excavationLine = material(0xb39a75);
+  const lineGeometry = new THREE.CylinderGeometry(0.009, 0.009, 1, 12);
+  function addExcavationLine(start, end) {
+    const from = new THREE.Vector3(...start);
+    const to = new THREE.Vector3(...end);
+    const direction = to.clone().sub(from);
+    const line = mesh(scene, lineGeometry, excavationLine);
+    line.position.copy(from).lerp(to, 0.5);
+    line.scale.y = direction.length();
+    line.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+  }
+  for (const x of [-2.75, 2.7]) addExcavationLine([x, 0.09, -5.4], [x, 0.09, 2.6]);
+  for (const z of [-4.35, 1.92]) addExcavationLine([-5, 0.12, z], [5, 0.12, z]);
+
   const finds = artifacts.map(({ x, z }) => {
     const group = new THREE.Group();
     group.position.set(x, 0.03, z);
