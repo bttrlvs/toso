@@ -31,7 +31,7 @@ const artifacts = [
   {
     title: '갓클립\nGAT CLIP',
     description: '갓을 여기저기 다 씌워보려는 제작자의 집착. 결국 갓모양의 클립까지 만들게 되었다. 종이 다발의 고정, 뜯은 봉투의 밀봉 등 실용적 기능으로 쓰기에도 좋을 뿐 아니라, 친구의 사진 위에 갓클립을 한번 씌워보자. 평범한 친구 얼굴도 케데헌의 진우로 탈바꿈 시켜줄 것이다.',
-    heartKey: 'toso.gatClipHearts', heartLabel: '갓클립 응원',
+    heartKey: 'gat-clip', heartLabel: '갓클립 응원',
     gallery: ['패키지', '클립 정면', '과자 봉투 밀봉', '종이 고정', '사진에 끼운 모습'],
     facts: [['Original Relic', '갓/갓집 (공주 32041)'], ['Material', 'ABS']],
     fundingNote: '2026년 하반기 뮷즈 공모 1차까지 올라간 제품. 제품 설계까지 다 마치고 디자인 등록 완료 상태. 양산을 원한다면 아래 하트버튼을 눌러 주시면, 펀딩을 곧 오픈하겠습니다.',
@@ -44,7 +44,7 @@ const artifacts = [
     image: './assets/lion-water-dropper-cutout.svg', imageAlt: '청록색 사자 모양 물뿌리개 제품 사진',
     facts: [['Original Relic', '청자 사자모양 연적 (신안 14871)'], ['Material', 'PLA']],
     fundingNote: '2026년 하반기 뮷즈 공모 1차까지 올라간 제품. 제품 설계까지 다 마쳤고, 3D 프린터로 오더메이드로 판매할 예정입니다.',
-    heartKey: 'toso.waterDropperHearts', heartLabel: '물뿌리개 응원',
+    heartKey: 'water-dropper', heartLabel: '물뿌리개 응원',
     descriptionFirst: true,
     x: -1.10, z: 1.78, markerX: 0.64, markerZ: -0.53,
   },
@@ -77,28 +77,37 @@ const heart = document.querySelector('#find-heart');
 const heartCount = heart.querySelector('.heart-count');
 const heartLabel = heart.querySelector('.heart-label');
 const heartCounts = new Map();
+const heartStatus = document.querySelector('#find-heart-status');
 let activeHeartKey;
+let heartRefreshTimer;
 
-function readHeartCount(key) {
+async function refreshHeartCount(key, method = 'GET') {
   try {
-    const saved = Number(localStorage.getItem(key));
-    if (Number.isSafeInteger(saved) && saved >= 0) return saved;
+    const response = await fetch(`/api/hearts/${key}`, { method, cache: 'no-store' });
+    if (!response.ok) throw new Error('Heart count unavailable');
+    const { count } = await response.json();
+    if (!Number.isSafeInteger(count) || count < 0) throw new Error('Invalid heart count');
+    const latest = Math.max(heartCounts.get(key) ?? 0, count);
+    heartCounts.set(key, latest);
+    if (activeHeartKey === key && details.open) {
+      heartCount.textContent = latest;
+      if (method === 'POST') heartStatus.textContent = '';
+    }
   } catch {
-    // The displayed count still works when browser storage is unavailable.
+    if (activeHeartKey === key && details.open && method === 'POST') {
+      heartStatus.textContent = '응원 수를 반영했는지 확인할 수 없습니다.';
+    }
   }
-  return 0;
 }
 
 heart.addEventListener('click', () => {
-  if (!activeHeartKey) return;
-  const count = heartCounts.get(activeHeartKey) + 1;
-  heartCounts.set(activeHeartKey, count);
-  heartCount.textContent = count;
-  try {
-    localStorage.setItem(activeHeartKey, String(count));
-  } catch {
-    // Keep the updated count in memory.
-  }
+  if (activeHeartKey) void refreshHeartCount(activeHeartKey, 'POST');
+});
+
+details.addEventListener('close', () => {
+  if (details.open) return;
+  clearInterval(heartRefreshTimer);
+  activeHeartKey = undefined;
 });
 
 function updateGallery() {
@@ -134,10 +143,8 @@ for (const marker of markers) {
     heart.hidden = !activeHeartKey;
     document.querySelector('#find-funding').hidden = Boolean(activeHeartKey);
     if (activeHeartKey) {
-      if (!heartCounts.has(activeHeartKey)) {
-        heartCounts.set(activeHeartKey, readHeartCount(activeHeartKey));
-      }
-      heartCount.textContent = heartCounts.get(activeHeartKey);
+      heartCount.textContent = heartCounts.get(activeHeartKey) ?? '–';
+      heartStatus.textContent = '';
       heartLabel.textContent = ` ${artifact.heartLabel}`;
     }
     image.hidden = Boolean(artifact.gallery);
@@ -170,6 +177,14 @@ for (const marker of markers) {
     }));
     details.scrollTop = 0;
     details.showModal();
+    clearInterval(heartRefreshTimer);
+    if (activeHeartKey) {
+      const key = activeHeartKey;
+      void refreshHeartCount(key);
+      heartRefreshTimer = setInterval(() => {
+        if (!document.hidden) void refreshHeartCount(key);
+      }, 3000);
+    }
     if (artifact.gallery) {
       slides.scrollLeft = 0;
       updateGallery();

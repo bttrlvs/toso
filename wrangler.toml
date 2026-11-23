@@ -1,0 +1,8 @@
+name = "toso-kr"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-11-23"
+
+[[d1_databases]]
+binding = "HEARTS"
+database_name = "toso-artifact-hearts"
+database_id = "d76a970f-145c-41b7-992a-6975aa80bfae"

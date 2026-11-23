@@ -128,6 +128,7 @@
     .artifact-card--description-first .artifact-image img { height: clamp(112px, 21dvh, 180px); }
     .artifact-card--description-first #find-description { border-bottom: 1px solid; }
     #find-funding-note { text-align: center; }
+    #find-heart-status:empty { display: none; }
     .artifact-funding { display: block; width: 100%; padding: 14px 6px; border: 0; background: #000; color: #fff; font: inherit; font-size: 1.125rem; font-weight: 500; cursor: default; }
     .site-footer {
       min-height: 200px; padding: 20px clamp(20px, 5vw, 72px);
@@ -236,6 +237,7 @@
     <button id="find-heart" class="artifact-funding artifact-heart" type="button" hidden>
       <span aria-hidden="true">❤️</span> <span class="heart-count" aria-live="polite">0</span><span class="heart-label"> 갓클립 응원</span>
     </button>
+    <p id="find-heart-status" role="status"></p>
   </dialog>
   <script type="module" src="./app.js"></script>
 </body>
