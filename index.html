@@ -87,8 +87,9 @@
     .find {
       position: absolute; left: var(--render-x, var(--marker-x)); top: var(--render-y, var(--marker-y)); transform: translate(-50%, -50%); display: grid; place-items: center;
       width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%;
-      background: transparent; color: #000;
+      appearance: none; background: transparent; color: #000;
     }
+    .find:focus { outline: none; }
     .find::before, .find::after, .find span { grid-area: 1 / 1; }
     .find span {
       width: 34px; height: 34px; border: 1px solid rgb(255 255 255 / 0.75);

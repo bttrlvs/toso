@@ -267,16 +267,6 @@ async function startExcavation(THREE) {
     object.scale.set(w, h, d);
     return object;
   }
-  function rod(parent, surface, start, end, bottom, top, segments = 12) {
-    const a = new THREE.Vector3(...start);
-    const b = new THREE.Vector3(...end);
-    const axis = b.clone().sub(a);
-    const object = mesh(parent, new THREE.CylinderGeometry(top, bottom, axis.length(), segments), surface);
-    object.position.copy(a).lerp(b, 0.5);
-    object.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), axis.normalize());
-    return object;
-  }
-
   function soilTexture() {
     const tile = document.createElement('canvas');
     tile.width = tile.height = 512;
@@ -352,10 +342,6 @@ async function startExcavation(THREE) {
   }
   stone.receiveShadow = true;
   scene.add(stone);
-
-  const string = material(0xb39a75);
-  for (const x of [-2.75, 2.7]) rod(scene, string, [x, 0.09, -5.4], [x, 0.09, 2.6], 0.009, 0.009);
-  for (const z of [-4.35, 1.92]) rod(scene, string, [-5, 0.12, z], [5, 0.12, z], 0.009, 0.009);
 
   const finds = artifacts.map(({ x, z }) => {
     const group = new THREE.Group();
