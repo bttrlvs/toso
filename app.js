@@ -459,20 +459,24 @@ async function startExcavation(THREE) {
 
   const portraitLoader = new THREE.TextureLoader();
 
-  function hideTextureRegions(material, key, polygons, width, height) {
-    const tests = polygons.map(polygon => {
-      const points = polygon.map(([x, y]) => `vec2(${(x / width).toFixed(6)}, ${(1 - y / height).toFixed(6)})`);
-      return `if (${points.map((point, i) => `portraitCross(vMapUv, ${point}, ${points[(i + 1) % points.length]})`).join(' ^^ ')}) discard;`;
-    }).join('\n');
-    material.onBeforeCompile = shader => {
-      shader.fragmentShader = `
-        bool portraitCross(vec2 p, vec2 a, vec2 b) {
-          return (a.y > p.y) != (b.y > p.y)
-            && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x;
-        }
-      ` + shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${tests}`);
-    };
-    material.customProgramCacheKey = () => `texture-crop-${key}`;
+  function maskTexture(texture, polygons, width, height) {
+    const layer = document.createElement('canvas');
+    layer.width = texture.image.width;
+    layer.height = texture.image.height;
+    const context = layer.getContext('2d');
+    context.drawImage(texture.image, 0, 0);
+    context.scale(layer.width / width, layer.height / height);
+    context.globalCompositeOperation = 'destination-out';
+    for (const polygon of polygons) {
+      context.beginPath();
+      context.moveTo(...polygon[0]);
+      for (const point of polygon.slice(1)) context.lineTo(...point);
+      context.closePath();
+      context.fill();
+    }
+    const masked = new THREE.CanvasTexture(layer);
+    masked.colorSpace = THREE.SRGBColorSpace;
+    return masked;
   }
 
   function setPortrait(hand, { file, x, z, direction, height, tip, wrist, hide, cropWidth }) {
@@ -501,9 +505,8 @@ async function startExcavation(THREE) {
         return portrait;
       }
 
-      const body = layer(photo, bodyTexture, tip);
-      hideTextureRegions(body.material, file, hide, cropWidth, 420);
-      hideTextureRegions(body.customDepthMaterial, file, hide, cropWidth, 420);
+      layer(photo, maskTexture(bodyTexture, hide, cropWidth, 420), tip);
+      bodyTexture.dispose();
       const wristPivot = new THREE.Group();
       wristPivot.position.set((wrist[0] - tip[0]) * width, 0.007, (wrist[1] - tip[1]) * height);
       photo.add(wristPivot);
@@ -546,8 +549,11 @@ async function startExcavation(THREE) {
       const height = width * texture.image.height / texture.image.width;
       const geometry = new THREE.PlaneGeometry(width, height, 44, 28);
       geometry.rotateX(-Math.PI / 2);
+      const pawOutline = [[311, 140], [333, 129], [350, 136], [390, 136], [391, 170], [343, 177], [308, 176], [293, 161]];
+      const bodyCut = [[321, 144], [337, 132], ...pawOutline.slice(2, -1), [309, 163]];
+      const bodyTexture = maskTexture(texture, [bodyCut], 430, 250);
       const image = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
-        map: texture, transparent: true, alphaTest: 0.10, toneMapped: false,
+        map: bodyTexture, transparent: true, alphaTest: 0.10, toneMapped: false,
       }));
       image.position.y = 0.22;
       dogRig.add(image);
@@ -568,10 +574,6 @@ async function startExcavation(THREE) {
       }
       dogTail = { positions, strands };
 
-      // Coordinates follow the front paw in the 430 × 250 cutout preview.
-      const pawOutline = [[311, 140], [333, 129], [350, 136], [390, 136], [391, 170], [343, 177], [308, 176], [293, 161]];
-      const bodyCut = [[321, 144], [337, 132], ...pawOutline.slice(2, -1), [309, 163]];
-      hideTextureRegions(image.material, 'jindo-front-paw', [bodyCut], 430, 250);
       const toX = x => (x / 430 - 0.5) * width;
       const toZ = z => (z / 250 - 0.5) * height;
       const pivot = new THREE.Group();
@@ -618,8 +620,7 @@ async function startExcavation(THREE) {
   let previous = 0;
   let frame = 0;
   let contextLost = false;
-  let shaderFailed = false;
-  renderer.debug.onShaderError = () => { shaderFailed = true; };
+  let renderFailed = false;
 
   function useFallback() {
     cancelAnimationFrame(frame);
@@ -689,14 +690,14 @@ async function startExcavation(THREE) {
       dust.setMatrixAt(brushDustCount + i, matrix.matrix);
     });
     dust.instanceMatrix.needsUpdate = true;
-    if (contextLost || shaderFailed) return;
+    if (contextLost || renderFailed) return;
     try {
       renderer.render(scene, camera);
     } catch (error) {
-      shaderFailed = true;
+      renderFailed = true;
       console.warn('Using the animated 2D excavation scene', error);
     }
-    if (shaderFailed) useFallback();
+    if (renderFailed) useFallback();
   }
 
   function resize() {
@@ -704,7 +705,7 @@ async function startExcavation(THREE) {
     const extension = parseFloat(getComputedStyle(stage).paddingBottom);
     const baseHeight = height - extension;
     const renderHeight = height + footer.getBoundingClientRect().height;
-    if (width <= 0 || baseHeight <= 0 || contextLost || shaderFailed) return;
+    if (width <= 0 || baseHeight <= 0 || contextLost || renderFailed) return;
     const aspect = width / baseHeight;
     const visibleHeight = Math.max(10.65, 5.85 / aspect);
     const compact = width < 720;
@@ -723,25 +724,25 @@ async function startExcavation(THREE) {
       marker.style.setProperty('--render-y', `${(1 - vector.y) * renderHeight / 2}px`);
     });
     draw(elapsed);
-    if (!shaderFailed) page.setAttribute('data-scene-ready', '');
+    if (!renderFailed) page.setAttribute('data-scene-ready', '');
   }
 
   function tick(now) {
     if (previous) elapsed += Math.min((now - previous) / 1000, 0.05);
     previous = now;
     draw(elapsed);
-    if (!shaderFailed && !contextLost) frame = requestAnimationFrame(tick);
+    if (!renderFailed && !contextLost) frame = requestAnimationFrame(tick);
   }
   function updatePlayback() {
     cancelAnimationFrame(frame);
     previous = 0;
-    if (!motion.matches && !document.hidden && !shaderFailed && !contextLost) frame = requestAnimationFrame(tick);
+    if (!motion.matches && !document.hidden && !renderFailed && !contextLost) frame = requestAnimationFrame(tick);
   }
   await Promise.all([...relicsReady, ...hands.map((hand, i) => setPortrait(hand, portraits[i])), loadDogPortrait()]);
   contextLost = renderer.getContext().isContextLost();
 
   function changeMotion() {
-    if (!contextLost && !shaderFailed) draw(elapsed);
+    if (!contextLost && !renderFailed) draw(elapsed);
     updatePlayback();
   }
   if (motion.addEventListener) motion.addEventListener('change', changeMotion);
@@ -758,7 +759,7 @@ async function startExcavation(THREE) {
   });
   canvas.addEventListener('webglcontextrestored', () => {
     contextLost = false;
-    shaderFailed = false;
+    renderFailed = false;
     resize();
     updatePlayback();
   });
