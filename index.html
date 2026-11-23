@@ -1,34 +1,240 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TOSO 土小 — 뿌리에서 출발한 작은 물건들</title>
-<meta name="description" content="한국 전통 유물에서 영감을 받아 오늘의 작은 물건을 만듭니다. TOSO 土小의 발굴터에서 새로운 제품을 발견하세요.">
-<meta name="theme-color" content="#302319"><link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#271912">
+  <title>TOSO</title>
+  <style>
+    @font-face {
+      font-family: "Jibaek Menu";
+      src: local("Jibaek 120g"), local("Jibaek-120g");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Jibaek Menu";
+      src: local("Jibaek 260g"), local("Jibaek-260g");
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #271912; color: #221914; font-family: system-ui, "Apple SD Gothic Neo", sans-serif; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; cursor: pointer; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #e72a39; outline-offset: 4px; }
+    header { position: absolute; z-index: 2; inset: 0 0 auto; display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 12px clamp(20px, 5vw, 72px); background: transparent; color: #fff; transition: background-color 240ms, color 240ms; }
+    header[data-menu-open] { background: #fff; color: #211713; }
+    body:has(header[data-menu-open]) { overflow: hidden; }
+    header > a { display: block; align-self: flex-start; }
+    .brand { display: block; width: clamp(112px, 29vw, 151px); height: auto; }
+    header[data-menu-open] .brand { filter: brightness(0); }
+    #menu-button {
+      align-self: flex-start; display: flex; align-items: flex-start; justify-content: flex-end;
+      min-width: 64px; min-height: 46px; padding: 0; border: 0;
+      background: transparent; color: inherit; text-align: right;
+      font: 400 12pt/1 "Jibaek Menu", system-ui, sans-serif;
+      appearance: none; text-shadow: none; filter: none;
+    }
+    #menu-button > span { text-box: trim-start cap alphabetic; }
+    .menu-panel {
+      position: absolute; top: 100%; inset-inline: 0; height: calc(100dvh - 72px);
+      overflow: hidden; pointer-events: none; color: #211713;
+      visibility: hidden; transition: visibility 0s linear 320ms;
+    }
+    .menu-panel > ul {
+      list-style: none; margin: 0; padding: 33px clamp(20px, 5vw, 72px);
+      min-height: 100%; background: #fff; transform: translateY(-100%);
+      font-family: "Jibaek Menu", system-ui, sans-serif;
+      font-size: 12pt; font-weight: 400; line-height: 1.25;
+      transition: transform 320ms cubic-bezier(.27, .72, .28, 1);
+    }
+    .menu-panel > ul > li { min-height: 21.96px; overflow-wrap: anywhere; }
+    .menu-panel > ul > li > a, .menu-panel summary { display: block; min-height: 21.96px; color: inherit; text-decoration: none; }
+    .menu-panel summary { cursor: pointer; list-style: none; }
+    .menu-panel summary::-webkit-details-marker { display: none; }
+    .menu-panel summary:focus-visible { outline: 3px solid #e72a39; outline-offset: 2px; }
+    .menu-panel .menu-copy { margin: 6px 0 12px; padding-inline-start: 20px; font-weight: 400; line-height: 1.5; word-break: keep-all; }
+    .menu-panel ul.menu-copy { list-style: none; }
+    .menu-panel .menu-copy a { color: inherit; text-decoration: underline; }
+    .menu-panel a:hover { text-decoration: underline; }
+    .menu-panel .shop-item { margin-top: 1.68rem; }
+    .menu-panel .shop-item small { font-size: inherit; font-weight: 400; }
+    header[data-menu-open] .menu-panel { visibility: visible; pointer-events: auto; overflow: auto; transition-delay: 0s; }
+    header[data-menu-open] .menu-panel > ul { transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      header, .menu-panel, .menu-panel > ul { transition: none; }
+    }
+    .excavation-page { position: relative; isolation: isolate; background: radial-gradient(ellipse at 46% 43%, #79543a, #352219 86%); }
+    .dig { --ground-extension: calc(clamp(164px, 48vw, 290px) + 48px); position: relative; isolation: isolate; padding-bottom: var(--ground-extension); min-height: calc(max(620px, 100svh) + var(--ground-extension)); height: calc(min(190vw, 900px) + var(--ground-extension)); overflow: hidden; }
+    .excavation-page canvas { position: absolute; inset: 0; z-index: -1; display: block; width: 100%; height: 100%; pointer-events: none; }
+    .find {
+      position: absolute; transform: translate(-50%, -50%); display: grid; place-items: center;
+      width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%;
+      background: transparent; color: #000;
+    }
+    .find::before, .find::after, .find span { grid-area: 1 / 1; }
+    .find span {
+      width: 34px; height: 34px; border: 1px solid rgb(255 255 255 / 0.75);
+      border-radius: 50%; background: rgb(255 255 255 / 0.7); box-shadow: 0 3px 10px #24110d99;
+    }
+    .find::before, .find::after { content: ""; z-index: 1; width: 13px; height: 2px; background: currentColor; }
+    .find::after { transform: rotate(90deg); }
+    .find:hover span, .find:focus-visible span { background: rgb(255 255 255 / 0.92); }
+    .notice { position: absolute; bottom: max(16px, env(safe-area-inset-bottom)); margin: 0; color: #fff5e8; }
+    .notice { left: 16px; right: 16px; font-size: .875rem; }
+    .artifact-card {
+      position: fixed; width: min(76vw, 390px); max-height: calc(100dvh - 24px);
+      padding: 0; border: 1px solid #111; background: #fff; color: #111;
+      font-family: "Jibaek Menu", system-ui, sans-serif;
+    }
+    .artifact-card::backdrop { background: rgb(255 255 255 / 0.87); }
+    .artifact-card form { position: absolute; inset: 0 0 auto auto; }
+    .artifact-card .close-artifact {
+      display: grid; place-items: start end; width: 44px; height: 44px;
+      margin: 0; padding: 0; border: 0; background: transparent; color: #111;
+    }
+    .close-artifact span {
+      width: 19px; height: 19px;
+      border-left: 1px solid currentColor; border-bottom: 1px solid currentColor;
+      background:
+        linear-gradient(45deg, transparent calc(50% - .5px), currentColor calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)),
+        linear-gradient(-45deg, transparent calc(50% - .5px), currentColor calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)),
+        #fff;
+    }
+    .artifact-image { margin: 0; min-height: 0; text-align: center; }
+    .artifact-image img { display: block; width: 100%; height: clamp(130px, 33dvh, 270px); padding: 21px 30px; object-fit: contain; }
+    .artifact-gallery[hidden], .artifact-funding[hidden], #find-image[hidden] { display: none; }
+    .artifact-slides { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .artifact-card .artifact-slides img { flex: 0 0 100%; scroll-snap-align: start; height: clamp(180px, 37dvh, 300px); padding: 0; }
+    .artifact-gallery-controls { display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .artifact-gallery-controls button, .artifact-heart { min-width: 44px; min-height: 44px; font: inherit; cursor: pointer; }
+    .artifact-gallery-controls button { background: transparent; border: 0; }
+    .artifact-funding.artifact-heart { cursor: pointer; }
+    .artifact-image figcaption { padding: 0 10px 8px; font-size: .7rem; font-weight: 400; }
+    .artifact-image a { color: inherit; }
+    .artifact-card h2 {
+      margin: 0; padding: 10px 8px; border-block: 1px solid;
+      font-size: clamp(1.25rem, 6.4vw, 2.1rem); line-height: 1.04; text-align: center; font-weight: 500; white-space: pre-line;
+    }
+    .artifact-card dl { margin: 0; font-size: clamp(.8rem, 3.75vw, 1rem); font-weight: 400; }
+    .artifact-card dl div { display: grid; grid-template-columns: auto 1fr; gap: 8px; padding: 10px 9px; border-bottom: 1px solid; }
+    .artifact-card dd { margin: 0; text-align: right; word-break: keep-all; overflow-wrap: anywhere; }
+    .artifact-card > p { margin: 0; padding: 10px; font-size: .8rem; font-weight: 400; line-height: 1.45; word-break: keep-all; }
+    .artifact-card--description-first .artifact-image img { height: clamp(112px, 21dvh, 180px); }
+    .artifact-card--description-first #find-description { border-bottom: 1px solid; }
+    #find-funding-note { text-align: center; }
+    .artifact-funding { display: block; width: 100%; padding: 14px 6px; border: 0; background: #000; color: #fff; font: inherit; font-size: 1.125rem; font-weight: 500; cursor: default; }
+    .site-footer {
+      min-height: 200px; padding: 20px clamp(20px, 5vw, 72px);
+      background: transparent; color: #fff; display: grid; align-content: center; gap: 9px;
+      font: 400 .75rem/1.4 "Jibaek Menu", system-ui, sans-serif;
+    }
+    .footer-sound {
+      justify-self: end; display: inline-flex; align-items: center; gap: 8px;
+      min-height: 44px; padding: 4px 0 4px 8px; border: 0; background: transparent;
+      color: inherit; font: inherit; cursor: pointer;
+    }
+    .footer-sound:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+    .footer-sound svg { width: 21px; height: 21px; filter: drop-shadow(0 1px 2px #190e08); }
+    .footer-sound[aria-pressed="false"] .sound-waves,
+    .footer-sound[aria-pressed="true"] .sound-muted { display: none; }
+    .site-footer p, .site-footer address { margin: 0; font-style: normal; }
+    .site-footer a { color: inherit; text-underline-offset: 2px; }
+    @media (min-width: 720px) {
+      .footer-sound { grid-column: 2; grid-row: 1 / span 3; align-self: end; }
+      .dig { --ground-extension: 48px; height: calc(100svh + var(--ground-extension)); }
+    }
+  </style>
 </head>
 <body>
-<header class="header"><a class="brand" href="#" aria-label="TOSO 홈"><img class="brand-logo" src="assets/toso-logo.svg" alt="TOSO" width="710" height="190"><span class="brand-hanja">土小</span></a><nav aria-label="주 메뉴"><a href="#story">OUR ROOTS</a><button data-open="collection">COLLECTION</button><button data-open="shop">SHOP <span class="shop-status">준비 중</span></button></nav></header>
-<main>
-<section class="excavation" aria-labelledby="hero-title">
-<div class="intro"><p class="eyebrow">FROM ROOTS TO SMALL GOODS</p><h1 id="hero-title">뿌리에서 출발한<br>작은 물건들.</h1><p class="invitation">흙 속에 숨은 작은 빛을 발견해 보세요.</p></div>
-<div class="dig-wrap"><div class="dig" role="group" aria-label="세 명의 고고학자가 유물을 발굴하는 탑뷰 장면. 빛나는 제품을 눌러 자세히 볼 수 있습니다.">
-<img class="dig-image" src="assets/excavation-wide.svg" alt="흙으로 된 발굴터에서 세 사람이 붓질하며 유물을 발견하는 정확한 탑뷰 장면" fetchpriority="high" width="1536" height="1024">
-<button class="find buddha" data-product="buddha" aria-label="붓다메이커 발견하기"><span class="spark" aria-hidden="true">✧</span><span class="find-label">붓다메이커</span></button>
-<button class="find lion" data-product="lion" aria-label="청자모양 사자연적 화병 발견하기"><span class="spark" aria-hidden="true">✧</span><span class="find-label">사자연적 화병</span></button>
-<button class="find cap" data-product="cap" aria-label="인두형 토제품 치약캡 발견하기"><span class="spark" aria-hidden="true">✧</span><span class="find-label">인두형 치약캡</span></button>
-<button class="find umbrella" data-product="umbrella" aria-label="갓우산 발견하기"><span class="spark" aria-hidden="true">✧</span><span class="find-label">갓우산</span></button>
-</div></div>
-<div class="dig-footer"><span>오래된 뿌리, 새로운 쓰임.</span><button data-open="collection">모든 물건 살펴보기</button><a href="#story">아래로 내려보기</a></div>
-</section>
-<section id="story" class="story"><div class="story-mark" aria-hidden="true">土<small>흙 토</small>小<small>작을 소</small></div><div class="story-copy"><p class="eyebrow">OUR ROOTS</p><h2>오래된 것에서,<br>오늘 곁에 둘 물건으로.</h2><p>흙은 뿌리가 자라는 곳이자, 오랜 시간을 품은 유산이 머무는 곳입니다. 토소는 한국 전통 유물에서 영감을 얻어 일상 속 작은 물건을 만듭니다.</p><p>유물의 형태를 다시 바라보고, 오늘의 쓰임을 더합니다.<br>우리의 뿌리가 당신의 일상에 닿을 수 있도록.</p><span class="signature">TOSO 土小</span></div></section>
-<section class="collection" id="collection"><div class="section-heading"><div><p class="eyebrow">SMALL GOODS, DEEP ROOTS</p><h2>새롭게 발견한 물건들</h2></div><p>유산에서 일상으로 이어지는 토소의 물건.</p></div><div class="product-grid">
-<button class="product-card photo-card" data-product="buddha"><div class="product-visual"><img src="assets/buddha-maker.svg" alt="눈으로 불두 형상을 만드는 붓다메이커 제품 사진" loading="lazy"></div><div class="card-meta"><h3>붓다메이커</h3><span>출시 예정</span></div><p>눈 위에 피어나는, 고요한 미소.</p></button>
-<button class="product-card" data-product="lion"><div class="product-visual soil-detail lion-detail"><span>유물에서 발견한<br>새로운 쓰임</span></div><div class="card-meta"><h3>청자모양 사자연적 화병</h3><span>제품 소개</span></div><p>전통의 형상에 새로운 일상을 담다.</p></button>
-<button class="product-card" data-product="umbrella"><div class="product-visual soil-detail umbrella-detail"><span>일상에 펼치는<br>우리의 전통</span></div><div class="card-meta"><h3>갓우산</h3><span>출시 예정</span></div><p>갓에서 영감을 얻은 새로운 우산.</p></button>
-<button class="product-card compact" data-product="cap"><div><p class="eyebrow">COMING SOON</p><h3>인두형 토제품 치약캡</h3><p>작은 유물의 표정이 일상 속으로.</p></div><span aria-hidden="true">✧</span></button>
-</div></section>
-</main>
-<footer><a class="brand" href="#"><img class="brand-logo" src="assets/toso-logo.svg" alt="TOSO" width="710" height="190"><span class="brand-hanja">土小</span></a><p>뿌리에서 출발한 작은 물건들<br><span>From roots to small goods</span></p><small>© <span id="year"></span> TOSO</small></footer>
-<dialog id="product-dialog" aria-labelledby="dialog-title"><button class="close" aria-label="제품 소개 닫기">×</button><div id="dialog-media"></div><div class="dialog-content"><p class="eyebrow" id="dialog-kicker"></p><h2 id="dialog-title"></h2><p id="dialog-description"></p><p class="dialog-note" id="dialog-note"></p><a id="purchase-link" class="primary" hidden>쇼핑몰에서 보기</a><button class="primary" id="pending-button">확인</button></div></dialog>
-<script src="app.js"></script>
-</body></html>
+  <header>
+    <a href="./" aria-label="TOSO 홈"><img class="brand" src="./assets/wordmark-white.png" alt="TOSO"></a>
+    <button id="menu-button" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-menu"><span>MENU</span></button>
+    <nav class="menu-panel" id="site-menu" aria-label="주 메뉴" inert>
+      <ul>
+        <li>
+          <details name="menu-section">
+            <summary>ABOUT</summary>
+            <p class="menu-copy">토소는 “From roots to small goods”라는 모토 아래, 우리의 뿌리에서 영감을 받아 현대적 소품을 만드는 서울 기반의 디자인 스튜디오입니다. 첫 번째 런칭 제품이자 뮷즈 26년 상반기 공모 당선작인 “갓우산 &lt;I WAS A GAT&gt;”을 시작으로, 현재 다양한 상품을 출시할 예정입니다.</p>
+          </details>
+        </li>
+        <li>
+          <details name="menu-section">
+            <summary>OFFICIAL RETAILER</summary>
+            <ul class="menu-copy">
+              <li>국립중앙박물관</li>
+              <li>국립대구박물관</li>
+              <li>국립진주박물관</li>
+              <li>국립경주박물관</li>
+              <li><a href="https://www.museumshop.or.kr/">뮷즈 온라인샵</a></li>
+            </ul>
+          </details>
+        </li>
+        <li>
+          <details name="menu-section">
+            <summary>CONTACT</summary>
+            <p class="menu-copy">toso.friends@gmail.com (CS/Collaboration)<br>
+              hello@betterlives.kr (B2B/Wholesale)</p>
+          </details>
+        </li>
+        <li class="shop-item">SHOP <small>(OPEN SOON)</small></li>
+        <li><a href="https://instagram.com/toso.kr">INSTAGRAM</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="excavation-page">
+    <canvas id="background" aria-hidden="true"></canvas>
+    <main class="dig" id="excavation" aria-label="유물 발굴 현장">
+      <button class="find" style="left:57%;top:18%" type="button" data-find="0" aria-label="붓다메이커 살펴보기"><span aria-hidden="true"></span></button>
+      <button class="find" style="left:32%;top:39%" type="button" data-find="1" aria-label="인두형 토제품 치약캡 살펴보기"><span aria-hidden="true"></span></button>
+      <button class="find" style="left:75%;top:45%" type="button" data-find="2" aria-label="갓클립 살펴보기"><span aria-hidden="true"></span></button>
+      <button class="find" style="left:34%;top:66%" type="button" data-find="3" aria-label="사자 모양 물뿌리개 살펴보기"><span aria-hidden="true"></span></button>
+      <p class="notice" id="scene-notice" hidden>이 브라우저에서 3D 발굴 장면을 표시할 수 없습니다. 유물 설명은 열어볼 수 있습니다.</p>
+    </main>
+    <footer class="site-footer">
+      <address>5F, 19, Shinconro2gil, Mapo-gu, Seoul,<br>
+        Republic of Korea 04051</address>
+      <p><a href="https://instagram.com/toso.kr">Instagram</a></p>
+      <p>Copyright ⓒ 2026.<br>
+        TOSO &amp; BETTERLIVES INC.<br>
+        All Rights Reserved.</p>
+      <button class="footer-sound" id="sound-toggle" type="button" aria-label="발굴터 배경음 · SOUND OFF" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 9h4l5-4v14l-5-4H3z"/>
+          <path class="sound-waves" d="M16 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12"/>
+          <path class="sound-muted" d="m16 10 4 4m0-4-4 4"/>
+        </svg>
+        <span>SOUND OFF</span>
+      </button>
+      <audio id="excavation-audio" src="./assets/excavation-ambience.mp3?v=2" preload="none" loop></audio>
+    </footer>
+  </div>
+  <dialog id="find-dialog" class="artifact-card" aria-labelledby="find-title" aria-describedby="find-description">
+    <form method="dialog"><button type="submit" class="close-artifact" aria-label="유물 닫기"><span aria-hidden="true"></span></button></form>
+    <figure class="artifact-image">
+      <img id="find-image" alt="">
+      <div id="find-gallery" class="artifact-gallery" role="group" aria-label="갓클립 제품 사진" hidden>
+        <div id="find-slides" class="artifact-slides" tabindex="0" aria-label="좌우로 넘기는 제품 사진"></div>
+        <div class="artifact-gallery-controls">
+          <button id="find-prev" type="button" aria-label="이전 사진">←</button>
+          <span id="find-slide-number" aria-live="polite">1 / 5</span>
+          <button id="find-next" type="button" aria-label="다음 사진">→</button>
+        </div>
+      </div>
+      <figcaption id="find-credit" hidden><a id="find-source">사진 출처 · 국립중앙박물관</a></figcaption>
+    </figure>
+    <h2 id="find-title"></h2>
+    <dl id="find-facts"></dl>
+    <p id="find-description"></p>
+    <p id="find-funding-note" hidden></p>
+    <button id="find-funding" class="artifact-funding" type="button" disabled>GO FUNDING</button>
+    <button id="find-heart" class="artifact-funding artifact-heart" type="button" hidden>
+      <span aria-hidden="true">❤️</span> <span class="heart-count" aria-live="polite">0</span><span class="heart-label"> 갓클립 응원</span>
+    </button>
+  </dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
