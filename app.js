@@ -231,7 +231,7 @@ async function startExcavation(THREE) {
   camera.position.set(0, 16, 0);
   camera.lookAt(0, 0, 0);
   camera.far = 40;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, compactDevice ? 1 : 1.65));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, compactDevice ? 1.5 : 1.65));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -633,6 +633,9 @@ async function startExcavation(THREE) {
   let elapsed = 0;
   let previous = 0;
   let frame = 0;
+  let frameSamples = 0;
+  let sampleDuration = 0;
+  let slowWindows = 0;
   let contextLost = false;
   let renderFailed = false;
 
@@ -742,7 +745,30 @@ async function startExcavation(THREE) {
   }
 
   function tick(now) {
-    if (previous) elapsed += Math.min((now - previous) / 1000, 0.05);
+    if (previous) {
+      const interval = now - previous;
+      elapsed += Math.min(interval / 1000, 0.05);
+      if (compactDevice && renderer.getPixelRatio() > 1) {
+        // Ignore gaps from suspended tabs and sample sustained frame pacing.
+        if (interval < 1000) {
+          frameSamples++;
+          sampleDuration += interval;
+        } else {
+          frameSamples = 0;
+          sampleDuration = 0;
+          slowWindows = 0;
+        }
+        if (frameSamples >= 30) {
+          slowWindows = sampleDuration / frameSamples > 36 ? slowWindows + 1 : 0;
+          frameSamples = 0;
+          sampleDuration = 0;
+          if (slowWindows >= 2) {
+            renderer.setPixelRatio(1);
+            resize();
+          }
+        }
+      }
+    }
     previous = now;
     draw(elapsed);
     if (!renderFailed && !contextLost) frame = requestAnimationFrame(tick);
@@ -750,6 +776,9 @@ async function startExcavation(THREE) {
   function updatePlayback() {
     cancelAnimationFrame(frame);
     previous = 0;
+    frameSamples = 0;
+    sampleDuration = 0;
+    slowWindows = 0;
     if (!motion.matches && !document.hidden && !renderFailed && !contextLost) frame = requestAnimationFrame(tick);
   }
   await Promise.all([...relicsReady, ...hands.map((hand, i) => setPortrait(hand, portraits[i])), loadDogPortrait()]);
