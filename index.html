@@ -84,6 +84,12 @@
     @keyframes fallback-brush { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
     @keyframes fallback-paw { from { transform: rotate(-6deg); } to { transform: rotate(7deg) translateX(3%); } }
     @media (prefers-reduced-motion: reduce) { .scene-fallback img { animation: none !important; } }
+    .funding-shortcuts { position: absolute; z-index: 1; top: 82px; right: clamp(20px, 5vw, 72px); display: grid; gap: 8px; }
+    .funding-shortcut { display: flex; align-items: center; gap: 7px; min-height: 44px; color: #fff; text-decoration: none; font: 400 11px/1.3 "Jibaek Menu", system-ui, sans-serif; }
+    .funding-shortcuts[hidden] { display: none; }
+    .funding-shortcut svg { flex: 0 0 40px; width: 40px; height: 40px; }
+    .funding-shortcut strong { display: block; font-size: 13px; font-weight: 500; }
+    .funding-shortcut .funding-caption { padding: 4px 6px; border-radius: 4px; background: #140d09e6; }
     .find {
       position: absolute; left: var(--render-x, var(--marker-x)); top: var(--render-y, var(--marker-y)); transform: translate(-50%, -50%); display: grid; place-items: center;
       width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%;
@@ -143,6 +149,7 @@
     #find-funding-note { text-align: center; }
     #find-heart-status:empty { display: none; }
     .artifact-funding { display: block; width: 100%; padding: 14px 6px; border: 0; background: #000; color: #fff; font: inherit; font-size: 1.125rem; font-weight: 500; cursor: default; }
+    a.artifact-funding { text-align: center; text-decoration: none; cursor: pointer; }
     .site-footer {
       min-height: 200px; padding: 20px clamp(20px, 5vw, 72px);
       background: transparent; color: #fff; display: grid; align-content: center; gap: 9px;
@@ -204,6 +211,16 @@
   <div class="excavation-page">
     <canvas id="background" aria-hidden="true"></canvas>
     <main class="dig" id="excavation" aria-label="유물 발굴 현장">
+      <nav class="funding-shortcuts" aria-label="텀블벅 펀딩" hidden data-start="2026-11-16T00:00:00+09:00" data-end="2026-12-16T00:00:00+09:00">
+        <a class="funding-shortcut" href="https://tumblbug.com/buddhamaker" data-funding="buddhamaker">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><path fill="#000" d="M20.00 0.00 Q22.54 7.25 27.65 1.52 Q27.22 9.19 34.14 5.86 Q30.81 12.78 38.48 12.35 Q32.75 17.46 40.00 20.00 Q32.75 22.54 38.48 27.65 Q30.81 27.22 34.14 34.14 Q27.22 30.81 27.65 38.48 Q22.54 32.75 20.00 40.00 Q17.46 32.75 12.35 38.48 Q12.78 30.81 5.86 34.14 Q9.19 27.22 1.52 27.65 Q7.25 22.54 0.00 20.00 Q7.25 17.46 1.52 12.35 Q9.19 12.78 5.86 5.86 Q12.78 9.19 12.35 1.52 Q17.46 7.25 20.00 0.00 Z"/><path fill="none" stroke="#fff" stroke-width="1.3" d="M15 25l10-10m-8 0h8v8"/></svg>
+          <span class="funding-caption">26년 하반기 국중박 뮷즈 선정<strong>붓다메이커 펀딩하러 가기</strong></span>
+        </a>
+        <a class="funding-shortcut" href="https://tumblbug.com/indoo-toothpastecap" data-funding="indoo-toothpastecap">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><path fill="#000" d="M20.00 0.00 Q22.54 7.25 27.65 1.52 Q27.22 9.19 34.14 5.86 Q30.81 12.78 38.48 12.35 Q32.75 17.46 40.00 20.00 Q32.75 22.54 38.48 27.65 Q30.81 27.22 34.14 34.14 Q27.22 30.81 27.65 38.48 Q22.54 32.75 20.00 40.00 Q17.46 32.75 12.35 38.48 Q12.78 30.81 5.86 34.14 Q9.19 27.22 1.52 27.65 Q7.25 22.54 0.00 20.00 Q7.25 17.46 1.52 12.35 Q9.19 12.78 5.86 5.86 Q12.78 9.19 12.35 1.52 Q17.46 7.25 20.00 0.00 Z"/><path fill="none" stroke="#fff" stroke-width="1.3" d="M15 25l10-10m-8 0h8v8"/></svg>
+          <span class="funding-caption">26년 하반기 국중박 뮷즈 선정<strong>치약캡 펀딩하러 가기</strong></span>
+        </a>
+      </nav>
       <div class="scene-fallback" aria-hidden="true">
         <div class="fallback-person" style="--x:27%;--y:20%;--angle:49deg;--wrist:29% 76%;--delay:-.2s"><img src="./assets/archaeologist-bun.webp" alt=""><img src="./assets/archaeologist-bun-hand.webp" alt=""></div>
         <div class="fallback-person" style="--x:70%;--y:35%;--angle:-25deg;--wrist:68% 71%;--delay:-.6s"><img src="./assets/archaeologist-bob.webp" alt=""><img src="./assets/archaeologist-bob-hand.webp" alt=""></div>
@@ -220,7 +237,8 @@
       <button class="find" style="--marker-x:34%;--marker-y:66%" type="button" data-find="3" aria-label="사자 모양 물뿌리개 살펴보기"><span aria-hidden="true"></span></button>
     </main>
     <footer class="site-footer">
-      <address>5F, 19 Sinchon-ro 2-gil, Mapo-gu, Seoul, 04051, South Korea 04051</address>
+      <address>5F, 19 Sinchon-ro 2-gil, Mapo-gu, Seoul,<br>
+        South Korea 04051</address>
       <p><a href="https://instagram.com/toso.kr">Instagram</a></p>
       <p>Copyright ⓒ 2026.<br>
         TOSO &amp; BETTERLIVES INC.<br>
@@ -254,12 +272,12 @@
     <dl id="find-facts"></dl>
     <p id="find-description"></p>
     <p id="find-funding-note" hidden></p>
-    <button id="find-funding" class="artifact-funding" type="button" disabled>GO FUNDING</button>
+    <a id="find-funding" class="artifact-funding" hidden>GO FUNDING</a>
     <button id="find-heart" class="artifact-funding artifact-heart" type="button" hidden>
       <span aria-hidden="true">❤️</span> <span class="heart-count" aria-live="polite">0</span><span class="heart-label"> 갓클립 응원</span>
     </button>
     <p id="find-heart-status" role="status"></p>
   </dialog>
-  <script type="module" src="./app.js?v=excavation-hidpi"></script>
+  <script type="module" src="./app.js?v=funding-links"></script>
 </body>
 </html>

@@ -7,12 +7,27 @@ const menu = document.querySelector('#site-menu');
 const details = document.querySelector('#find-dialog');
 const markers = [...document.querySelectorAll('.find')];
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
+const fundingShortcuts = document.querySelector('.funding-shortcuts');
+const fundingStart = Date.parse(fundingShortcuts.dataset.start);
+const fundingEnd = Date.parse(fundingShortcuts.dataset.end);
+
+function updateFundingShortcuts() {
+  const now = Date.now();
+  fundingShortcuts.hidden = now < fundingStart || now >= fundingEnd;
+  const nextChange = now < fundingStart ? fundingStart : fundingEnd;
+  if (now < nextChange) {
+    setTimeout(updateFundingShortcuts, Math.min(nextChange - now, 2147483647));
+  }
+}
+updateFundingShortcuts();
+
 const artifacts = [
   {
     title: '붓다메이커\nBUDDHA MAKER',
     description: "4세기 후반 한반도에 불교가 들어온 이후, 불교는 한반도의 문화와 역사의 큰 영향을 미쳤다. 짧은 시간에 압축성장을 한 대한민국사회는 2020년대 들어 마음챙김과 휴식의 가치가 다시 주목받으며 젊은 세대를 중심으로 불교가 유행하기 시작했다. 번뇌와 무지를 없애고 깨달음을 얻어 부처가 되는 것을 '성불'이라고 하였는데, 붓다메이커는 삼국시대 신라의 동제불두 유물을 차용해 만들어 진 성불템이다. 눈 오는 겨울날은 눈으로, 여름날 해변에서는 모래로 나만의 부처를 만들 수 있도록 가위형태의 손잡이와 불두 형태의 몰드가 결합이 돼 있다.",
     image: './assets/buddha-maker-cutout.webp', imageAlt: '붓다메이커 제품 사진',
     facts: [['Original Relic', '동제불두 (경주381), 국립경주박물관'], ['Material', '플라스틱']],
+    fundingUrl: 'https://tumblbug.com/buddhamaker',
     fundingNote: '2026년 뮷즈 하반기 공모 최종선정. 펀딩을 통해 특별 할인혜택을 받아보세요.',
     descriptionFirst: true,
     x: -0.26, z: -2.36, markerX: 0.76, markerZ: -0.43,
@@ -22,6 +37,7 @@ const artifacts = [
     description: '특유의 귀여운 표정 때문에 많은 사람에게 사랑받는 인두형 토제품은 5세기 가야의 유물이다. 흙으로 만든 가면이고, 제사장이 제의를 행할 때 썼을 것으로 추정된다. 국립진주박물관의 대표 유물이다. 제사장의 머리에 쓰던 것을 치약에 씌웠다. 인두형 토제품 치약캡은 실리콘으로 제작돼 평소에는 닫혀있는 토출구가 치약을 누르면 열리며 입부분에서 치약이 빼꼼 나온다.',
     image: './assets/toothpaste-cap-cutout.webp', imageAlt: '인두형 토제품 치약캡 앞면과 뒷면',
     facts: [['Original Relic', '인두형 토제품 (진주 20501)'], ['Material', '실리콘']],
+    fundingUrl: 'https://tumblbug.com/indoo-toothpastecap',
     fundingNote: '2026년 뮷즈 하반기 공모 최종선정. 펀딩을 통해 특별 할인혜택을 받아보세요.',
     descriptionFirst: true,
     x: -1.08, z: -0.80, markerX: -0.64, markerZ: 0.02,
@@ -139,7 +155,10 @@ for (const marker of markers) {
     gallery.hidden = !artifact.gallery;
     activeHeartKey = artifact.heartKey;
     heart.hidden = !activeHeartKey;
-    document.querySelector('#find-funding').hidden = Boolean(activeHeartKey);
+    const fundingLink = document.querySelector('#find-funding');
+    fundingLink.hidden = !artifact.fundingUrl;
+    if (artifact.fundingUrl) fundingLink.href = artifact.fundingUrl;
+    else fundingLink.removeAttribute('href');
     if (activeHeartKey) {
       heartCount.textContent = heartCounts.get(activeHeartKey) ?? '–';
       heartStatus.textContent = '';
